@@ -12,13 +12,13 @@ const generateToken = id => {
 // 🟢 Register a New User
 router.post('/register', async (req, res) => {
   try {
-    const {name, email, password} = req.body;
-    const userExists = await User.findOne({email});
+    const { name, email, password, mobile } = req.body;
+    const userExists = await User.findOne({ email });
 
     if (userExists)
-      return res.status(400).json({message: 'User already exists'});
+      return res.status(400).json({ message: "User already exists" });
 
-    const newUser = new User({name, email, password});
+    const newUser = new User({ name, email, password, mobile });
     await newUser.save();
 
     res.status(201).json({message: 'User registered successfully'});
