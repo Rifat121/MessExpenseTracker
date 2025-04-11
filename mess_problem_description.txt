@@ -1,0 +1,30 @@
+
+Problem:
+we have a mess where we stay together, buy house chores like soap, toilet cleaner and such things for day to day usage. along with that we do bazar for cooking purpose. then we have the bills to pay at the end of the month like house rent, wifi billl, electric bills, gas bill, salary of maid and such. we may have other utilities to pay also. This gets tougher to manage as so many calculations are there. we for now, maintain a excel sheet where just one of us has the access to update or entry. other just view. 
+
+Motivation: 
+I want to have something to ease this process. there can be an approval system where every member can input their expenses and then it awaits for the approval and then  get listed. there can be a small database, to store the expenses and further calculation. every member can get the info at any time. at the end of the  month, it will notify each member about the update and due to pay in time.
+
+
+##endpoint
+GET http://localhost:5000/api/meals/summary/:messId?month=2025-04
+GET http://localhost:5000/api/meals/:messId?month=2025-04
+
+PUT http://localhost:5000/api/fixed-expenses/:messId
+GET http://localhost:5000/api/fixed-expenses/:messId
+
+PATCH http://localhost:5000/api/mess/:id/swap-admin
+
+GET http://localhost:5000/api/mess/:id/members
+
+POST http://localhost:5000/api/mess/create
+POST http://localhost:5000/api/mess/join
+POST http://localhost:5000/api/mess/approve/:userId --> issue with equals method. will solve
+DELETE http://localhost:5000/api/mess/remove/:userId 
+DELETE http://localhost:5000/api/mess/reject/:userId 
+
+POST http://localhost:5000/api/meals/ --> to set meals for specific date
+GET http://localhost:5000/api/meals/user/:userId --> uporer ta diye post korar por dekhleo update hocchena. check korbo
+GET http://localhost:5000/api/meals/summary/:messId
+
+(need to extract mess member list)

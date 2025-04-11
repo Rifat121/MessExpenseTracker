@@ -1,20 +1,27 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const protect = async (req, res, next) => {
+exports.protect = async (req, res, next) => {
   let token = req.headers.authorization;
 
-  if (token && token.startsWith('Bearer')) {
+  if (token && token.startsWith("Bearer")) {
     try {
-      const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select('-password');
+      const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select("-password");
       next();
     } catch (error) {
-      res.status(401).json({message: 'Unauthorized, invalid token'});
+      res.status(401).json({ message: "Unauthorized, invalid token" });
     }
   } else {
-    res.status(401).json({message: 'Unauthorized, no token provided'});
+    res.status(401).json({ message: "Unauthorized, no token provided" });
   }
 };
 
-module.exports = {protect};
+exports.isAdmin = (req, res, next) => {
+  if (req.user?.isAdmin) {
+    return res
+      .status(403)
+      .json({ message: "Only admins can perform this action." });
+  }
+  next();
+};

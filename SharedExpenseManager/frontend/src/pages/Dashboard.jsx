@@ -46,9 +46,10 @@ const Dashboard = () => {
         <h3 className="text-lg font-semibold mb-2">Expenses</h3>
         {expenses.length > 0 ? (
           <ul className="list-none p-0">
+            {console.log(expenses)}
             {expenses.map((expense) => (
               <li key={expense._id} className="bg-gray-200 p-2 my-2 rounded">
-                {expense.description} - ${expense.amount}
+                {expense.payer.name} - {expense.category} - ${expense.amount}
               </li>
             ))}
           </ul>
