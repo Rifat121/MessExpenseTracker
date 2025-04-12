@@ -6,6 +6,7 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mobile, setMobile] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async () => {
@@ -14,6 +15,7 @@ const Register = () => {
         name,
         email,
         password,
+        mobile,
       });
       alert("Registration successful! Please log in.");
       navigate("/");
@@ -28,21 +30,27 @@ const Register = () => {
         <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
         <input
           type="text"
-          placeholder="Name"
+          placeholder="Enter Name"
           className="w-full px-3 py-2 border rounded mb-2"
           onChange={(e) => setName(e.target.value)}
         />
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Enter Email"
           className="w-full px-3 py-2 border rounded mb-2"
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Enter Password"
           className="w-full px-3 py-2 border rounded mb-4"
           onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Enter Contact Number"
+          className="w-full px-3 py-2 border rounded mb-2"
+          onChange={(e) => setMobile(e.target.value)}
         />
         <button
           className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
