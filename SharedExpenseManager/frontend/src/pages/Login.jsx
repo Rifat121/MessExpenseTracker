@@ -21,7 +21,11 @@ const Login = () => {
         password,
       });
       localStorage.setItem("token", res.data.token); // Store token
-      navigate("/dashboard");
+      if (res.data.messId) {
+        navigate("/dashboard");
+      } else {
+        navigate("/create-or-join");
+      }
     } catch (error) {
       console.error("Login failed", error);
     }
