@@ -1,45 +1,27 @@
-const express = require('express');
-const Expense = require('../models/Expense');
+const express = require("express");
+const Expense = require("../models/Expense");
 
 const router = express.Router();
-const {protect} = require('../middleware/authMiddleware');
-
-// POST /api/expenses/submit
-router.post('/submit', protect, async (req, res) => {
-  try {
-    const {amount, category, payer} = req.body;
-
-    const newExpense = new Expense({
-      amount,
-      category,
-      payer,
-      status: 'pending', // Expense starts as "pending"
-    });
-
-    await newExpense.save();
-    res.status(201).json({message: 'Expense submitted successfully'});
-  } catch (error) {
-    res.status(500).json({message: 'Server Error', error});
-  }
-});
+const { protect } = require("../middleware/authMiddleware");
+const User = require("../models/User");
 
 // PUT /api/expenses/approve/:id
-router.put('/approve/:id', async (req, res) => {
+router.put("/approve/:id", async (req, res) => {
   try {
-    const {status} = req.body; // Expected values: 'approved' or 'rejected'
+    const { status } = req.body; // Expected values: 'approved' or 'rejected'
 
-    if (!['approved', 'rejected'].includes(status)) {
-      return res.status(400).json({message: 'Invalid status value'});
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
     }
 
     const updatedExpense = await Expense.findByIdAndUpdate(
       req.params.id,
-      {approved: status === 'approved'},
-      {new: true},
+      { approved: status === "approved" },
+      { new: true }
     );
 
     if (!updatedExpense) {
-      return res.status(404).json({message: 'Expense not found'});
+      return res.status(404).json({ message: "Expense not found" });
     }
 
     res.json({
@@ -47,42 +29,61 @@ router.put('/approve/:id', async (req, res) => {
       expense: updatedExpense,
     });
   } catch (error) {
-    res.status(500).json({message: 'Server Error', error});
+    res.status(500).json({ message: "Server Error", error });
   }
 });
-  
 
-// 🟢 Add a New Expense
-router.post('/add', async (req, res) => {
+// POST /api/expenses/add
+router.post("/add", protect, async (req, res) => {
   try {
-    const {amount, category, payer} = req.body;
-    const newExpense = new Expense({amount, category, payer});
+    const { amount, category, date } = req.body;
+
+    if (!amount || !category) {
+      return res
+        .status(400)
+        .json({ message: "Amount and category are required" });
+    }
+
+    if (!req.user.messId) {
+      return res.status(400).json({ message: "User is not part of a mess" });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    const newExpense = new Expense({
+      amount,
+      category,
+      messId: user.messId,
+      payer: user._id,
+      date: date || new Date(),
+      approved: user.isAdmin, // auto-approve if admin
+    });
 
     await newExpense.save();
-    res.status(201).json({message: 'Expense added successfully'});
+    res
+      .status(201)
+      .json({ message: "Expense added successfully", expense: newExpense });
   } catch (error) {
-    res.status(500).json({message: 'Server Error', error});
+    console.error("Error adding expense:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 });
 
 // 🟢 Get Recent Expenses for a specific mess
-router.get('/recent/:messId', protect, async (req, res) => {
+router.get("/recent/:messId", protect, async (req, res) => {
   const { messId } = req.params;
 
   try {
-    const expenses = await Expense.find({ mess: messId })
-      .populate('payer', 'name email')
-      .sort({ date: -1 }) // Most recent first
-      .limit(10); // Optional: only recent 10 expenses
+    const expenses = await Expense.find({ messId })
+      .populate("payer", "name email")
+      .sort({ date: -1 })
+      .limit(10);
 
     res.json(expenses);
   } catch (error) {
-    console.error('Error fetching recent expenses:', error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    console.error("Error fetching recent expenses:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 });
-
-module.exports = router;
-
 
 module.exports = router;
