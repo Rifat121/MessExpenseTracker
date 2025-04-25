@@ -18,7 +18,7 @@ exports.protect = async (req, res, next) => {
 };
 
 exports.isAdmin = (req, res, next) => {
-  if (req.user?.isAdmin) {
+  if (!req.user?.isAdmin) {
     return res
       .status(403)
       .json({ message: "Only admins can perform this action." });

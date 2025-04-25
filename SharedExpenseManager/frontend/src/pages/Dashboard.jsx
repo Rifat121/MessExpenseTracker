@@ -7,13 +7,19 @@ import RecentExpensesCard from "./RecentExpensesCard";
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [mess, setMess] = useState(null);
-  const [splitSummary, setSplitSummary] = useState([]);
+  // const [splitSummary, setSplitSummary] = useState([]);
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/"); // or whatever your login route is
+  };
+  const handleNavigateToAdminDashboard = () => {
+    if (user.isAdmin) {
+      console.log(user);
+      navigate("/admin-dashboard", { state: { user } }); // Navigate to Admin Dashboard route
+    }
   };
 
   useEffect(() => {
@@ -36,11 +42,11 @@ const Dashboard = () => {
         );
         setMess(messRes.data);
 
-        const splitRes = await axios.get(
-          `http://localhost:5000/api/expenses/split-summary/${messId}/${userId}`,
-          { headers }
-        );
-        setSplitSummary(splitRes.data);
+        // const splitRes = await axios.get(
+        //   `http://localhost:5000/api/expenses/split-summary/${messId}/${userId}`,
+        //   { headers }
+        // );
+        // setSplitSummary(splitRes.data);
       } catch (err) {
         console.error(
           "Error loading dashboard data:",
@@ -69,6 +75,14 @@ const Dashboard = () => {
             Logout
           </button>
         </div>
+        {user.isAdmin && (
+          <button
+            onClick={handleNavigateToAdminDashboard}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Go to Admin Dashboard
+          </button>
+        )}
 
         <h2 className="text-xl font-bold mb-2">{mess.name}</h2>
         <p className="text-gray-700">👥 Members: {mess.members?.length || 1}</p>
@@ -104,7 +118,7 @@ const Dashboard = () => {
       <FixedExpensesCard messId={mess._id} />
 
       {/* 🧮 Split Summary */}
-      <div className="bg-white p-6 rounded-2xl shadow-md">
+      {/* <div className="bg-white p-6 rounded-2xl shadow-md">
         <h3 className="text-lg font-semibold mb-4">You Owe / Receive</h3>
         <ul className="text-sm space-y-2">
           {splitSummary.map((item, idx) => (
@@ -117,7 +131,7 @@ const Dashboard = () => {
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
     </div>
   );
 };

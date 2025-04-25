@@ -82,28 +82,30 @@ router.post("/join", protect, async (req, res) => {
   }
 });
 
-// POST /api/mess/approve/:userId
-router.post("/approve/:userId", protect, async (req, res) => {
+// POST /api/mess/:messId/approve/:userId
+router.post("/:messId/approve/:userId", protect, isAdmin, async (req, res) => {
   try {
-    const admin = await User.findById(req.user._id);
+    const { messId, userId } = req.params;
 
-    if (!admin.isAdmin) {
-      return res
-        .status(403)
-        .json({ message: "Only admins can approve members" });
+    if (!req.user.messId?.equals(messId)) {
+      return res.status(403).json({ message: "Access denied to this mess" });
     }
 
-    const userToApprove = await User.findById(req.params.userId);
-    if (!userToApprove || !userToApprove.messId.equals(admin.messId)) {
+    const userToApprove = await User.findById(userId);
+    if (!userToApprove || !userToApprove.messId?.equals(messId)) {
       return res
         .status(404)
-        .json({ message: "User not found or not part of your mess" });
+        .json({ message: "User not found in your mess" });
+    }
+
+    if (userToApprove.isApproved) {
+      return res.status(400).json({ message: "User is already approved" });
     }
 
     userToApprove.isApproved = true;
     await userToApprove.save();
 
-    await Mess.findByIdAndUpdate(admin.messId, {
+    await Mess.findByIdAndUpdate(messId, {
       $addToSet: { members: userToApprove._id },
     });
 
@@ -114,22 +116,22 @@ router.post("/approve/:userId", protect, async (req, res) => {
   }
 });
 
-// GET /api/mess/pending-members
-router.get("/pending-members", protect, async (req, res) => {
-  try {
-    const admin = await User.findById(req.user._id);
 
-    if (!admin.isAdmin) {
-      return res
-        .status(403)
-        .json({ message: "Only admins can view pending members" });
+// GET /api/mess/:messId/pending-members
+router.get("/:messId/pending-members", protect, isAdmin, async (req, res) => {
+  try {
+    const { messId } = req.params;
+
+    // Ensure admin belongs to the same mess
+    if (!req.user.messId?.equals(messId)) {
+      return res.status(403).json({ message: "Access denied to this mess" });
     }
 
     const pendingUsers = await User.find({
-      messId: admin.messId,
+      messId,
       isApproved: false,
-    }).select("-password"); // Exclude hashed password
-
+    }).select("-password");
+    console.log(pendingUsers)
     res.json(pendingUsers);
   } catch (error) {
     console.error("Pending Members Error:", error);
@@ -137,67 +139,63 @@ router.get("/pending-members", protect, async (req, res) => {
   }
 });
 
-// DELETE /api/mess/reject/:userId
-router.delete("/reject/:userId", protect, async (req, res) => {
+// DELETE /api/mess/:messId/reject/:userId
+router.delete("/:messId/reject/:userId", protect, isAdmin, async (req, res) => {
   try {
-    const admin = await User.findById(req.user._id);
-    if (!admin.isAdmin)
-      return res
-        .status(403)
-        .json({ message: "Only admins can reject members" });
+    const { messId, userId } = req.params;
 
-    const userToReject = await User.findById(req.params.userId);
-    if (!userToReject || !userToReject.messId?.equals(admin.messId)) {
-      return res
-        .status(404)
-        .json({ message: "User not found or not part of your mess" });
+    if (!req.user.messId?.equals(messId)) {
+      return res.status(403).json({ message: "Access denied to this mess" });
     }
 
-    if (userToReject.isApproved) {
-      return res.status(400).json({
-        message: "Cannot reject already approved member. Use remove instead.",
-      });
+    const user = await User.findById(userId);
+    if (!user || !user.messId?.equals(messId)) {
+      return res.status(404).json({ message: "User not found in your mess" });
     }
 
-    userToReject.messId = null;
-    userToReject.isApproved = false;
-    await userToReject.save();
+    if (user.isApproved) {
+      return res
+        .status(400)
+        .json({ message: "Use remove for approved members" });
+    }
 
-    res.json({ message: "User rejected and removed from mess" });
+    user.messId = null;
+    user.isApproved = false;
+    await user.save();
+
+    res.json({ message: "User rejected and unlinked from mess" });
   } catch (error) {
     console.error("Reject Error:", error);
     res.status(500).json({ message: "Server Error", error });
   }
 });
 
-// DELETE /api/mess/remove/:userId
-router.delete("/remove/:userId", protect, async (req, res) => {
+// DELETE /api/mess/:messId/remove/:userId
+router.delete("/:messId/remove/:userId", protect, isAdmin, async (req, res) => {
   try {
-    const admin = await User.findById(req.user._id);
-    if (!admin.isAdmin)
-      return res
-        .status(403)
-        .json({ message: "Only admins can remove members" });
+    const { messId, userId } = req.params;
 
-    const userToRemove = await User.findById(req.params.userId);
-    if (!userToRemove || !userToRemove.messId?.equals(admin.messId)) {
-      return res
-        .status(404)
-        .json({ message: "User not found or not part of your mess" });
+    if (!req.user.messId?.equals(messId)) {
+      return res.status(403).json({ message: "Access denied to this mess" });
     }
 
-    if (!userToRemove.isApproved) {
+    const user = await User.findById(userId);
+    if (!user || !user.messId?.equals(messId)) {
+      return res.status(404).json({ message: "User not found in your mess" });
+    }
+
+    if (!user.isApproved) {
       return res
         .status(400)
-        .json({ message: "Use reject to remove a pending user" });
+        .json({ message: "Use reject for unapproved users" });
     }
 
-    userToRemove.messId = null;
-    userToRemove.isApproved = false;
-    await userToRemove.save();
+    user.messId = null;
+    user.isApproved = false;
+    await user.save();
 
-    await Mess.findByIdAndUpdate(admin.messId, {
-      $pull: { members: userToRemove._id },
+    await Mess.findByIdAndUpdate(messId, {
+      $pull: { members: user._id },
     });
 
     res.json({ message: "Member removed successfully" });

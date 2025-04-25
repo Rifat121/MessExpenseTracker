@@ -4,6 +4,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreateOrJoinMess from "./pages/CreateOrJoinMess";
 import PrivateRoute from "./components/PrivateRoute"; // Import PrivateRoute
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/create-or-join" element={<CreateOrJoinMess />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
         </Route>
       </Routes>
     </Router>
