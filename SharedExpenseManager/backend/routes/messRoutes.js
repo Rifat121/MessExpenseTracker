@@ -207,4 +207,45 @@ router.delete("/remove/:userId", protect, async (req, res) => {
   }
 });
 
+// 🟢 Get Mess details by messId
+router.get('/:messId', protect, async (req, res) => {
+  const { messId } = req.params;
+
+  try {
+    // Fetch mess by messId
+    const mess = await Mess.findById(messId);
+
+    if (!mess) {
+      return res.status(404).json({ message: 'Mess not found' });
+    }
+
+    // Fetch admin details using adminId
+    const admin = await User.findOne({ _id: { $in: mess.members }, isAdmin: true });
+    if (!admin) {
+      return res.status(400).json({ message: 'Admin not found among members' });
+    }
+
+    // Fetch members details using member IDs
+    const members = await User.find({ '_id': { $in: mess.members } });
+
+    res.json({
+      _id: mess._id,
+      name: mess.name,
+      admin: {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+      },
+      members: members.map((member) => ({
+        _id: member._id,
+        name: member.name,
+        email: member.email,
+      })),
+    });
+  } catch (error) {
+    console.error('Error fetching mess details:', error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+});
+
 module.exports = router;

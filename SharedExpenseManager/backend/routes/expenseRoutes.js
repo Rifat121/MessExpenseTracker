@@ -65,14 +65,24 @@ router.post('/add', async (req, res) => {
   }
 });
 
-// 🟢 Get All Expenses
-router.get('/', async (req, res) => {
+// 🟢 Get Recent Expenses for a specific mess
+router.get('/recent/:messId', protect, async (req, res) => {
+  const { messId } = req.params;
+
   try {
-    const expenses = await Expense.find().populate('payer', 'name email');
+    const expenses = await Expense.find({ mess: messId })
+      .populate('payer', 'name email')
+      .sort({ date: -1 }) // Most recent first
+      .limit(10); // Optional: only recent 10 expenses
+
     res.json(expenses);
   } catch (error) {
-    res.status(500).json({message: 'Server Error', error});
+    console.error('Error fetching recent expenses:', error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
+
+module.exports = router;
+
 
 module.exports = router;

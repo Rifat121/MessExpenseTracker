@@ -9,13 +9,21 @@ const CreateOrJoinMess = () => {
 
   const navigate = useNavigate();
 
+  const token = localStorage.getItem("token"); // Assuming you store JWT like this
+
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/mess/create", {
-        name: createMessName,
-      });
-      if (res.status === 200) {
+      const res = await axios.post(
+        "http://localhost:5000/api/mess/create",
+        { messname: createMessName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (res.status === 201) {
         navigate("/dashboard");
       }
     } catch (err) {
@@ -26,7 +34,15 @@ const CreateOrJoinMess = () => {
   const handleJoin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/mess/join", { code: joinCode });
+      const res = await axios.post(
+        "http://localhost:5000/api/mess/join",
+        { code: joinCode },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (res.status === 200) {
         navigate("/dashboard");
       }
