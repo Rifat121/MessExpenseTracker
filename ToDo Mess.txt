@@ -1,0 +1,1 @@
+1. User shouldn't be able to redirect to /register, /login, /create-or-join route while logged in.
