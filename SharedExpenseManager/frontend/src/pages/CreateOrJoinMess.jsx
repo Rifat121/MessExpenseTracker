@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const CreateOrJoinMess = () => {
   const [createMessName, setCreateMessName] = useState("");
-  const [joinCode, setJoinCode] = useState("");
+  const [messName, setMessName] = useState("");
   const [activeTab, setActiveTab] = useState("create");
 
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ const CreateOrJoinMess = () => {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/mess/join",
-        { messname: joinCode },
+        { messname: messName },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -102,12 +102,12 @@ const CreateOrJoinMess = () => {
       {activeTab === "join" && (
         <form onSubmit={handleJoin} className="space-y-4">
           <label className="block">
-            <span className="text-gray-700">Invite Code</span>
+            <span className="text-gray-700">Mess Name</span>
             <input
               type="text"
               className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)}
+              value={messName}
+              onChange={(e) => setMessName(e.target.value)}
               required
             />
           </label>
