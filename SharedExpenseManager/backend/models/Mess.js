@@ -9,6 +9,4 @@ const MessSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// TODO: Update this schema to hold admin id field in the db. currently not storing
-
 module.exports = mongoose.model("Mess", MessSchema);

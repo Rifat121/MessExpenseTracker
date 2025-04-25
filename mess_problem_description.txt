@@ -5,17 +5,6 @@ we have a mess where we stay together, buy house chores like soap, toilet cleane
 Motivation: 
 I want to have something to ease this process. there can be an approval system where every member can input their expenses and then it awaits for the approval and then  get listed. there can be a small database, to store the expenses and further calculation. every member can get the info at any time. at the end of the  month, it will notify each member about the update and due to pay in time.
 
-Further_Information:
-there should be approval system for now, but one can chose to have the voting option too.
-
-tech stack:
-i want a mobile app mainly but can have the web address too
-
-Expense categories:
-there should be categories definitely
-
-Payment_Tracking:
-there can be option to cash payment and also online payment
 
 ##endpoint
 GET http://localhost:5000/api/meals/summary/:messId?month=2025-04
