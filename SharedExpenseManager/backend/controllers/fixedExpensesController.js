@@ -14,12 +14,14 @@ exports.getFixedExpenses = async (req, res) => {
 
 // PUT /fixed-expenses/:messId
 exports.updateFixedExpenses = async (req, res) => {
-  const { bill, rent, maid } = req.body;
+  const { electricity_bill, gas_bill, internet_bill, rent, maid } = req.body;
   try {
     const updated = await FixedExpenses.findOneAndUpdate(
       { messId: req.params.messId },
       {
-        bill,
+        electricity_bill,
+        gas_bill,
+        internet_bill,
         rent,
         maid,
         updatedBy: req.user._id,
