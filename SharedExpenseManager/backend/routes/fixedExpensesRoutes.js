@@ -4,9 +4,9 @@ const {
   getFixedExpenses,
   updateFixedExpenses,
 } = require("../controllers/fixedExpensesController");
-const { protect } = require("../middleware/authMiddleware"); // Will add `isAdmin` later
+const { protect, isAdmin } = require("../middleware/authMiddleware");
 
 router.get("/:messId", protect, getFixedExpenses);
-router.put("/:messId", protect, updateFixedExpenses); // Will add `isAdmin` later
+router.put("/:messId", protect, isAdmin, updateFixedExpenses);
 
 module.exports = router;

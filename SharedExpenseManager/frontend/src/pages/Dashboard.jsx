@@ -115,7 +115,7 @@ const Dashboard = () => {
       {/* 📝 Recent Expenses */}
       <RecentExpensesCard messId={mess._id} user={user} />
 
-      <FixedExpensesCard messId={mess._id} />
+      <FixedExpensesCard messId={mess._id} user={user} />
 
       {/* 🧮 Split Summary */}
       {/* <div className="bg-white p-6 rounded-2xl shadow-md">
