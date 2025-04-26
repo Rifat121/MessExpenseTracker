@@ -86,14 +86,16 @@ const RecentExpensesCard = ({ user }) => {
 
       {showForm && (
         <div className="mb-4 space-y-2">
-          <input
-            type="text"
+          <select
             name="category"
-            placeholder="Category (e.g. Milk, Snacks)"
             value={newExpense.category}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
-          />
+            className="w-full border p-2 rounded bg-white"
+          >
+            <option value="">Select Category</option>
+            <option value="Groceries">Groceries</option>
+            <option value="Utilities">Utilities</option>
+          </select>
           <input
             type="number"
             name="amount"
