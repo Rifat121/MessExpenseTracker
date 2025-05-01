@@ -5,6 +5,7 @@ import api from "../api/api";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,19 +16,47 @@ const Login = () => {
   }, [navigate]);
 
   const handleLogin = async () => {
+    setError("");
+
+    if (!email || !password) {
+      setError("Both Email and Password are required.");
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      setError("Please enter a valid Email address.");
+      return;
+    }
+
+    if (password.length < 5) {
+      setError("Password must be at least 5 characters long.");
+      return;
+    }
     try {
-      const res = await api.post("/api/users/login", {
-        email,
-        password,
-      });
-      localStorage.setItem("token", res.data.token); // Store token
-      if (res.data.messId) {
-        navigate("/dashboard");
-      } else {
-        navigate("/create-or-join");
+      const res = await api.post("/api/users/login", { email, password });
+
+      if (!res.data.token) {
+        setError("Invalid email or password. Please try again.");
+        return;
       }
+      localStorage.setItem("token", res.data.token);
+
+      navigateToDashboard(res.data.messId);
     } catch (error) {
       console.error("Login failed", error);
+      setError(
+        error.response?.data.message ||
+          "Login failed. Please check your credentials."
+      );
+    }
+  };
+
+  const navigateToDashboard = (messId) => {
+    if (messId) {
+      navigate("/dashboard");
+    } else {
+      navigate("/create-or-join");
     }
   };
 
@@ -47,6 +76,7 @@ const Login = () => {
           className="input-field mb-4"
           onChange={(e) => setPassword(e.target.value)}
         />
+        {error && <div className="text-red-500 mb-4">{error}</div>}
         <button className="btn btn-primary mb-2" onClick={handleLogin}>
           Login
         </button>
