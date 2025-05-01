@@ -7,24 +7,32 @@ const AdminDashboard = () => {
   const user = location.state?.user;
   const [pendingMembers, setPendingMembers] = useState([]);
   const [approvedMembers, setApprovedMembers] = useState([]);
+  const [error, setError] = useState("");
   const messId = user.messId;
   const token = localStorage.getItem("token");
 
   const fetchPendingMembers = async () => {
+    setError("");
     try {
       const res = await api.get(`/api/mess/${messId}/pending-members`, {
         headers: {
           Authorization: `Bearer ${token}`, // Add token as Bearer token
         },
       });
-      console.log(res);
       setPendingMembers(res.data);
     } catch (error) {
       console.error("Fetch error", error.response?.data || error.message);
+      const errorMessage = !error.response
+        ? "Network error. Please try again later."
+        : error.response?.data.message ||
+          "Error fetching Pending Members. Please try reloading.";
+
+      setError(errorMessage);
     }
   };
 
   const fetchApprovedMembers = async () => {
+    setError("");
     try {
       const res = await api.get(`/api/mess/${messId}/members`, {
         headers: {
@@ -37,10 +45,17 @@ const AdminDashboard = () => {
         "Approved fetch error",
         error.response?.data || error.message
       );
+      const errorMessage = !error.response
+        ? "Network error. Please try again later."
+        : error.response?.data.message ||
+          "Error fetching approved member list. Please try reloading.";
+
+      setError(errorMessage);
     }
   };
 
   const handleApprove = async (userId) => {
+    setError("");
     try {
       await api.post(`/api/mess/${messId}/approve/${userId}`, {
         headers: {
@@ -50,6 +65,12 @@ const AdminDashboard = () => {
       fetchPendingMembers();
     } catch (error) {
       console.log(error, "Couldn't approve user");
+      const errorMessage = !error.response
+        ? "Network error. Please try again later."
+        : error.response?.data.message ||
+          "Error approving member. Please try reloading the page.";
+
+      setError(errorMessage);
     }
   };
 
@@ -87,6 +108,8 @@ const AdminDashboard = () => {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       {/* Pending Members */}
+      {error && <div className="text-red-500">{error}</div>}
+
       <h2 className="text-2xl font-bold mb-4">Pending Members</h2>
       {pendingMembers.length === 0 ? (
         <p className="text-gray-500 mb-6">No pending members</p>
@@ -115,24 +138,31 @@ const AdminDashboard = () => {
 
       {/* Approved Members */}
       <h2 className="text-2xl font-bold mt-10 mb-4">Approved Members</h2>
-      {approvedMembers.length === 0 ? (
-        <p className="text-gray-500">No approved members yet</p>
-      ) : (
-        approvedMembers.map((member) => (
-          <div key={member._id} className="bg-white rounded-xl shadow p-4 mb-4">
-            <p className="text-lg font-semibold">{member.name}</p>
-            <p className="text-sm text-gray-500">{member.email}</p>
-            <div className="mt-2">
-              <button
-                onClick={() => handleRemove(member._id)}
-                className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Remove
-              </button>
+      <div>
+        {error && <div className="text-red-500">{error}</div>}
+
+        {approvedMembers.length === 0 ? (
+          <p className="text-gray-500">No approved members yet</p>
+        ) : (
+          approvedMembers.map((member) => (
+            <div
+              key={member._id}
+              className="bg-white rounded-xl shadow p-4 mb-4"
+            >
+              <p className="text-lg font-semibold">{member.name}</p>
+              <p className="text-sm text-gray-500">{member.email}</p>
+              <div className="mt-2">
+                <button
+                  onClick={() => handleRemove(member._id)}
+                  className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-          </div>
-        ))
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };

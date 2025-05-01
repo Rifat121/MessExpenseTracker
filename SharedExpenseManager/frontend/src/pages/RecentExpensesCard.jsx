@@ -4,6 +4,8 @@ import api from "../api/api";
 const RecentExpensesCard = ({ user }) => {
   const [expenses, setExpenses] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
   const [newExpense, setNewExpense] = useState({
     category: "",
     amount: "",
@@ -11,6 +13,8 @@ const RecentExpensesCard = ({ user }) => {
   });
 
   const fetchExpenses = async () => {
+    setLoading(true); // Start loading
+
     try {
       const res = await api.get(`/api/expenses/recent/${user.messId}`, {
         headers: {
@@ -19,8 +23,18 @@ const RecentExpensesCard = ({ user }) => {
       });
 
       setExpenses(res.data);
+      setError(""); // Clear any previous errors
     } catch (err) {
       console.error("Error fetching expenses:", err);
+
+      const errorMessage = !err.response
+        ? "Network error. Please try again later."
+        : err.response?.data.message ||
+          "Error fetching expenses. Please try again.";
+
+      setError(errorMessage); // Set error message
+    } finally {
+      setLoading(false); // End loading
     }
   };
 
@@ -35,48 +49,59 @@ const RecentExpensesCard = ({ user }) => {
   };
 
   const handleSubmit = async () => {
-    const expenseData = {
-      ...newExpense,
-    };
-
+    setError("");
+    if (!newExpense.amount || !newExpense.category) {
+      setError("Both Amount and Category are required.");
+      return;
+    }
+    if (!newExpense.amount || newExpense.amount < 0) {
+      setError("Amount must be a valid number.");
+      return;
+    }
     try {
-      const res = await api.post(`/api/expenses/add`, {
+      const res = await api.post("/api/expenses/add", newExpense, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(expenseData),
       });
 
-      if (res.ok) {
-        setNewExpense({
-          category: "",
-          amount: "",
-          date: new Date().toISOString().split("T")[0],
-        });
-        setShowForm(false);
-        fetchExpenses();
-      } else {
-        const errData = await res.data;
-        console.error("Add failed:", errData.message);
-      }
+      // Success case
+      setNewExpense({
+        category: "",
+        amount: "",
+        date: new Date().toISOString().split("T")[0],
+      });
+      setShowForm(false);
+      fetchExpenses();
     } catch (err) {
       console.error("Error adding expense:", err);
+
+      const errorMessage = !err.response
+        ? "Network error. Please try again later."
+        : err.response?.data.message ||
+          "Error adding recent expenses. Please try again.";
+
+      setError(errorMessage);
     }
   };
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-md">
+      {loading && <p>Loading...</p>} {/* Display loading message */}
+      {error && <div className="text-red-500">{error}</div>}
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">Recent Expenses</h3>
         <button
           className="text-blue-600 text-sm hover:underline"
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setError();
+            setShowForm(!showForm);
+          }}
         >
           {showForm ? "Cancel" : "Add New"}
         </button>
       </div>
-
       {showForm && (
         <div className="mb-4 space-y-2">
           <select
@@ -112,29 +137,30 @@ const RecentExpensesCard = ({ user }) => {
           </button>
         </div>
       )}
-
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="text-gray-600 border-b">
-            <th className="py-2">Date</th>
-            <th>Category</th>
-            <th>Amount</th>
-            <th>Paid By</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expenses.map((exp) => (
-            <tr key={exp._id} className="border-b">
-              <td className="py-2">
-                {new Date(exp.date).toLocaleDateString()}
-              </td>
-              <td>{exp.category}</td>
-              <td>৳{exp.amount}</td>
-              <td>{exp.payer?.name || "N/A"}</td>
+      {!loading && !error && expenses.length > 0 && (
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="text-gray-600 border-b">
+              <th className="py-2">Date</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Paid By</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {expenses.map((exp) => (
+              <tr key={exp._id} className="border-b">
+                <td className="py-2">
+                  {new Date(exp.date).toLocaleDateString()}
+                </td>
+                <td>{exp.category}</td>
+                <td>৳{exp.amount}</td>
+                <td>{exp.payer?.name || "N/A"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

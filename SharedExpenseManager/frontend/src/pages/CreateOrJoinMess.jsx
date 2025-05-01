@@ -6,12 +6,14 @@ const CreateOrJoinMess = () => {
   const [createMessName, setCreateMessName] = useState("");
   const [messName, setMessName] = useState("");
   const [activeTab, setActiveTab] = useState("create");
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token"); // Assuming you store JWT like this
 
   const handleCreate = async (e) => {
+    setError("");
     e.preventDefault();
     try {
       const res = await api.post(
@@ -28,10 +30,16 @@ const CreateOrJoinMess = () => {
       }
     } catch (err) {
       console.error("Error creating mess:", err.response?.data || err.message);
+      const errorMessage = !err.response
+        ? "Network error. Please try again later."
+        : err.response?.data.message || "Error creating mess.";
+
+      setError(errorMessage);
     }
   };
 
   const handleJoin = async (e) => {
+    setError("");
     e.preventDefault();
     try {
       const res = await api.post(
@@ -48,6 +56,11 @@ const CreateOrJoinMess = () => {
       }
     } catch (err) {
       console.error("Error joining mess:", err.response?.data || err.message);
+      const errorMessage = !err.response
+        ? "Network error. Please try again later."
+        : err.response?.data.message || "Error joining mess.";
+
+      setError(errorMessage);
     }
   };
 
@@ -56,6 +69,8 @@ const CreateOrJoinMess = () => {
       <h2 className="text-2xl font-bold text-center">Join or Create a Mess</h2>
 
       <div className="flex justify-center space-x-4">
+        {error && <div className="text-red-500">{error}</div>}
+
         <button
           onClick={() => setActiveTab("create")}
           className={`px-4 py-2 rounded-full ${
