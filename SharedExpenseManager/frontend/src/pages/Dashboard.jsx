@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import FixedExpensesCard from "./FixedExpensesCard";
 import RecentExpensesCard from "./RecentExpensesCard";
+import MealFormCard from "./MealFormCard";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [mess, setMess] = useState(null);
+  const [showMealForm, setShowMealForm] = useState(false);
   // const [splitSummary, setSplitSummary] = useState([]);
 
   const token = localStorage.getItem("token");
@@ -17,12 +19,12 @@ const Dashboard = () => {
   };
   const handleNavigateToAdminDashboard = () => {
     if (user.isAdmin) {
-      console.log(user);
-      navigate("/admin-dashboard", { state: { user } }); // Navigate to Admin Dashboard route
+      navigate("/admin-dashboard", { state: { user } });
     }
   };
 
   useEffect(() => {
+    if (!token) return;
     const fetchData = async () => {
       try {
         const headers = {
@@ -87,6 +89,23 @@ const Dashboard = () => {
         <p className="text-gray-700">
           👑 Admin: {user.isAdmin ? "You" : "N/A"}
         </p>
+
+        {/* 🍽️ Meal Count Form */}
+        <div className="mb-4 mt-2">
+          <button
+            onClick={() => setShowMealForm(!showMealForm)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            {showMealForm ? "Hide Meal Entry" : "Add Meal Entry"}
+          </button>
+        </div>
+
+        {/* Conditionally render the form */}
+        {showMealForm && (
+          <div className="w-full max-w-md mx-auto">
+            <MealFormCard token={token} setShowMealForm={setShowMealForm} />
+          </div>
+        )}
       </div>
 
       {/* 💸 Expense Summary */}
