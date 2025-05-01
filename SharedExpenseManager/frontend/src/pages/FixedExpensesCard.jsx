@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../api/api";
 
 const FixedExpensesCard = ({ messId, user }) => {
   const [expenses, setExpenses] = useState({
@@ -13,32 +14,25 @@ const FixedExpensesCard = ({ messId, user }) => {
 
   const fetchExpenses = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/fixed-expenses/${messId}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+      const res = await api.get(`/api/fixed-expenses/${messId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
 
-      const data = await res.json();
-      if (res.ok) {
-        setExpenses({
-          electricity_bill: data.electricity_bill || "",
-          gas_bill: data.gas_bill || "",
-          internet_bill: data.internet_bill || "",
-          rent: data.rent || "",
-          maid: data.maid || "",
-        });
-        setEditedExpenses({
-          electricity_bill: data.electricity_bill || "",
-          gas_bill: data.gas_bill || "",
-          internet_bill: data.internet_bill || "",
-          rent: data.rent || "",
-          maid: data.maid || "",
-        });
-      } else {
-        console.error("Fetch failed:", data.message);
-      }
+      const data = res.data;
+      setExpenses({
+        electricity_bill: data.electricity_bill || "",
+        gas_bill: data.gas_bill || "",
+        internet_bill: data.internet_bill || "",
+        rent: data.rent || "",
+        maid: data.maid || "",
+      });
+      setEditedExpenses({
+        electricity_bill: data.electricity_bill || "",
+        gas_bill: data.gas_bill || "",
+        internet_bill: data.internet_bill || "",
+        rent: data.rent || "",
+        maid: data.maid || "",
+      });
     } catch (err) {
       console.error("Error fetching expenses:", err);
     }
@@ -54,17 +48,13 @@ const FixedExpensesCard = ({ messId, user }) => {
 
   const handleSave = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/fixed-expenses/${messId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(editedExpenses),
-        }
-      );
+      const res = await api.put(`/api/fixed-expenses/${messId}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(editedExpenses),
+      });
 
       if (res.ok) {
         setIsEditing(false);

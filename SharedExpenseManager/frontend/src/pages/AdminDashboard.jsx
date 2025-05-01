@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // or use your custom API wrapper
+import api from "../api/api";
 import { useLocation } from "react-router-dom";
 
 const AdminDashboard = () => {
@@ -12,14 +12,11 @@ const AdminDashboard = () => {
 
   const fetchPendingMembers = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/mess/${messId}/pending-members`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token as Bearer token
-          },
-        }
-      );
+      const res = await api.get(`/api/mess/${messId}/pending-members`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add token as Bearer token
+        },
+      });
       console.log(res);
       setPendingMembers(res.data);
     } catch (error) {
@@ -29,14 +26,11 @@ const AdminDashboard = () => {
 
   const fetchApprovedMembers = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/mess/${messId}/members`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token as Bearer token
-          },
-        }
-      );
+      const res = await api.get(`/api/mess/${messId}/members`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add token as Bearer token
+        },
+      });
       setApprovedMembers(res.data);
     } catch (error) {
       console.error(
@@ -48,14 +42,11 @@ const AdminDashboard = () => {
 
   const handleApprove = async (userId) => {
     try {
-      await axios.post(
-        `http://localhost:5000/api/mess/${messId}/approve/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token as Bearer token
-          },
-        }
-      );
+      await api.post(`/api/mess/${messId}/approve/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add token as Bearer token
+        },
+      });
       fetchPendingMembers();
     } catch (error) {
       console.log(error, "Couldn't approve user");
@@ -64,14 +55,11 @@ const AdminDashboard = () => {
 
   const handleReject = async (userId) => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/mess/${messId}/reject/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token as Bearer token
-          },
-        }
-      );
+      await api.delete(`/api/mess/${messId}/reject/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add token as Bearer token
+        },
+      });
       fetchPendingMembers();
     } catch (error) {
       console.log(error, "Couldn't reject user");
@@ -80,14 +68,11 @@ const AdminDashboard = () => {
 
   const handleRemove = async (userId) => {
     try {
-      await axios.delete(
-        `http://localhost:5000/api/mess/${messId}/remove/${userId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token as Bearer token
-          },
-        }
-      );
+      await api.delete(`/api/mess/${messId}/remove/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add token as Bearer token
+        },
+      });
       fetchApprovedMembers();
     } catch (error) {
       console.log(error, "Couldn't remove user");

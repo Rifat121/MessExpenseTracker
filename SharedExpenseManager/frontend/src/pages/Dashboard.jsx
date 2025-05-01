@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/api";
 import FixedExpensesCard from "./FixedExpensesCard";
 import RecentExpensesCard from "./RecentExpensesCard";
 
@@ -29,21 +29,18 @@ const Dashboard = () => {
           Authorization: `Bearer ${token}`,
         };
 
-        const userRes = await axios.get("http://localhost:5000/api/users/me", {
+        const userRes = await api.get("/api/users/me", {
           headers,
         });
         setUser(userRes.data);
 
         const { messId, _id: userId } = userRes.data;
 
-        const messRes = await axios.get(
-          `http://localhost:5000/api/mess/${messId}`,
-          { headers }
-        );
+        const messRes = await api.get(`/api/mess/${messId}`, { headers });
         setMess(messRes.data);
 
-        // const splitRes = await axios.get(
-        //   `http://localhost:5000/api/expenses/split-summary/${messId}/${userId}`,
+        // const splitRes = await api.get(
+        //   `/api/expenses/split-summary/${messId}/${userId}`,
         //   { headers }
         // );
         // setSplitSummary(splitRes.data);

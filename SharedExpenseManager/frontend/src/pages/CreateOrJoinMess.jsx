@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 import { useNavigate } from "react-router-dom";
 
 const CreateOrJoinMess = () => {
@@ -14,8 +14,8 @@ const CreateOrJoinMess = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/mess/create",
+      const res = await api.post(
+        "/api/mess/create",
         { messname: createMessName },
         {
           headers: {
@@ -34,8 +34,8 @@ const CreateOrJoinMess = () => {
   const handleJoin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/mess/join",
+      const res = await api.post(
+        "/api/mess/join",
         { messname: messName },
         {
           headers: {

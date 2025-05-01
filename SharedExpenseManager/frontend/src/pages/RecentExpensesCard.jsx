@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import api from "../api/api";
 
 const RecentExpensesCard = ({ user }) => {
   const [expenses, setExpenses] = useState([]);
@@ -11,20 +12,13 @@ const RecentExpensesCard = ({ user }) => {
 
   const fetchExpenses = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/expenses/recent/${user.messId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setExpenses(data);
-      } else {
-        console.error("Failed to load expenses:", data.message);
-      }
+      const res = await api.get(`/api/expenses/recent/${user.messId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      setExpenses(res.data);
     } catch (err) {
       console.error("Error fetching expenses:", err);
     }
@@ -46,8 +40,7 @@ const RecentExpensesCard = ({ user }) => {
     };
 
     try {
-      const res = await fetch(`http://localhost:5000/api/expenses/add`, {
-        method: "POST",
+      const res = await api.post(`/api/expenses/add`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -64,7 +57,7 @@ const RecentExpensesCard = ({ user }) => {
         setShowForm(false);
         fetchExpenses();
       } else {
-        const errData = await res.json();
+        const errData = await res.data;
         console.error("Add failed:", errData.message);
       }
     } catch (err) {
