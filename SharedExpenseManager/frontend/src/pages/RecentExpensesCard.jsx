@@ -54,8 +54,8 @@ const RecentExpensesCard = ({ user }) => {
       setError("Both Amount and Category are required.");
       return;
     }
-    if (!newExpense.amount || newExpense.amount < 0) {
-      setError("Amount must be a valid number.");
+    if (!newExpense.amount || newExpense.amount <= 0) {
+      setError("Amount must be a valid positive number.");
       return;
     }
     try {

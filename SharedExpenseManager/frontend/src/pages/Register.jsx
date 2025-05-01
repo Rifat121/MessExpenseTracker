@@ -48,7 +48,7 @@ const Register = () => {
       });
 
       // On successful registration
-      setSuccess("Registration successful! Logging you in...");
+      setSuccess("Registration successful! Please Login.");
       setTimeout(() => navigate("/"), 1000);
     } catch (error) {
       console.error("Registration failed", error);
