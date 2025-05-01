@@ -2,7 +2,7 @@ const MealEntry = require('../models/MealEntry');
 const FixedExpenses = require('../models/FixedExpenses');
 const User = require('../models/User');
 
-// POST /meals
+// POST /meals/addMeal
 exports.addOrUpdateMeal = async (req, res) => {
   const { date, mealCount } = req.body;
   const userId = req.user._id;

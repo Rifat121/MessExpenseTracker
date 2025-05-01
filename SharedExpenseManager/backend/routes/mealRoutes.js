@@ -9,7 +9,7 @@ const {
 
 const { protect, isAdmin } = require("../middleware/authMiddleware");
 
-router.post("/", protect, addOrUpdateMeal);
+router.post("/addMeal", protect, addOrUpdateMeal);
 router.get("/:messId", protect, isAdmin, getMealsByMess);
 router.get("/user/:userId", protect, getMealsByUser);
 router.get("/summary/:messId", protect, isAdmin, getMealSummary);
