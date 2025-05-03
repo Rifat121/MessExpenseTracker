@@ -1,6 +1,8 @@
-const MealEntry = require('../models/MealEntry');
-const FixedExpenses = require('../models/FixedExpenses');
-const User = require('../models/User');
+const mongoose = require("mongoose");
+const MealEntry = require("../models/MealEntry");
+const FixedExpenses = require("../models/FixedExpenses");
+const Expense = require("../models/Expense");
+const User = require("../models/User");
 
 // POST /meals/addMeal
 exports.addOrUpdateMeal = async (req, res) => {
@@ -16,7 +18,7 @@ exports.addOrUpdateMeal = async (req, res) => {
     );
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -32,11 +34,11 @@ exports.getMealsByMess = async (req, res) => {
   try {
     const meals = await MealEntry.find({
       messId,
-      date: { $gte: start, $lt: end }
-    }).populate('userId', 'name');
+      date: { $gte: start, $lt: end },
+    }).populate("userId", "name");
     res.json(meals);
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -52,14 +54,15 @@ exports.getMealsByUser = async (req, res) => {
   try {
     const meals = await MealEntry.find({
       userId,
-      date: { $gte: start, $lt: end }
+      date: { $gte: start, $lt: end },
     }).sort({ date: 1 });
     res.json(meals);
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
+// Skipping this for now
 // GET /meals/summary/:messId?month=YYYY-MM
 exports.getMealSummary = async (req, res) => {
   const { messId } = req.params;
@@ -73,11 +76,13 @@ exports.getMealSummary = async (req, res) => {
     const [meals, fixed, users] = await Promise.all([
       MealEntry.find({ messId, date: { $gte: start, $lt: end } }),
       FixedExpenses.findOne({ messId }),
-      User.find({ messId }, 'name')
+      User.find({ messId }, "name"),
     ]);
 
     const memberMap = new Map();
-    users.forEach(user => memberMap.set(user._id.toString(), { name: user.name, totalMeals: 0 }));
+    users.forEach((user) =>
+      memberMap.set(user._id.toString(), { name: user.name, totalMeals: 0 })
+    );
 
     let totalMeals = 0;
 
@@ -89,7 +94,8 @@ exports.getMealSummary = async (req, res) => {
       }
     }
 
-    const fixedTotal = (fixed?.bill || 0) + (fixed?.rent || 0) + (fixed?.maid || 0);
+    const fixedTotal =
+      (fixed?.bill || 0) + (fixed?.rent || 0) + (fixed?.maid || 0);
 
     const memberCount = users.length;
     const messTotalExpense = await calculateTotalExpenses(messId, start, end); // Placeholder for other expenses
@@ -100,24 +106,128 @@ exports.getMealSummary = async (req, res) => {
       userId,
       name: data.name,
       totalMeals: data.totalMeals,
-      mealCost: (data.totalMeals * mealRate).toFixed(2)
+      mealCost: (data.totalMeals * mealRate).toFixed(2),
     }));
 
     res.json({
       totalMeals,
       totalMealExpense: mealExpense.toFixed(2),
       mealRate,
-      members
+      members,
     });
-
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-// NOTE: This function should fetch total variable expenses.
-// For now, mock this or implement based on how you track personal/shared expenses.
-const calculateTotalExpenses = async (messId, start, end) => {
-  // This should eventually sum all non-fixed expenses (e.g., shared groceries etc.)
-  return 10000; // Mock total for now
+// GET /meals/summary/:messId?month=YYYY-MM
+exports.getMealRate = async (req, res) => {
+  const { messId } = req.params;
+  const { month } = req.query;
+
+  const start = new Date(`${month}-01`);
+  const end = new Date(start);
+  end.setMonth(start.getMonth() + 1);
+
+  try {
+    const messObjectId = new mongoose.mongo.ObjectId(messId);
+    console.log("Mess ID:", messObjectId);
+    console.log("Month range:", start.toISOString(), "-", end.toISOString());
+
+    const [meals, fixed, users, recentExpenses] = await Promise.all([
+      MealEntry.find({
+        messId: messObjectId,
+        date: { $gte: start, $lt: end },
+      }),
+      FixedExpenses.findOne({ messId: messObjectId }),
+      User.find({ messId: messObjectId }, "name"),
+      Expense.aggregate([
+        {
+          $match: {
+            messId: messObjectId,
+            date: { $gte: start, $lt: end },
+            approved: true,
+            category: { $in: ["Groceries", "Utilities"] },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$amount" },
+          },
+        },
+      ]),
+    ]);
+
+    console.log("Fetched meals:", meals.length);
+    console.log("Sample meal data:", meals[0]);
+    console.log("Fetched users:", users.length);
+    console.log("Fetched fixed expenses:", fixed);
+    console.log("Recent expenses aggregation:", recentExpenses);
+
+    const memberMap = new Map();
+    users.forEach((user) => {
+      memberMap.set(user._id.toString(), { name: user.name, totalMeals: 0 });
+    });
+
+    let totalMeals = 0;
+    for (const meal of meals) {
+      const userId = meal.userId?.toString?.();
+      if (!userId) {
+        console.warn("Missing userId on meal:", meal);
+        continue;
+      }
+
+      if (memberMap.has(userId)) {
+        const userData = memberMap.get(userId);
+        userData.totalMeals += meal.mealCount;
+        totalMeals += meal.mealCount;
+      } else {
+        console.warn("Meal entry userId not found in memberMap:", userId);
+      }
+    }
+
+    let fixedTotal = 0;
+    if (fixed) {
+      const ignoreFields = [
+        "_id",
+        "messId",
+        "updatedBy",
+        "createdAt",
+        "updatedAt",
+        "__v",
+      ];
+      const fixedObj = fixed.toObject();
+      for (const key in fixedObj) {
+        if (!ignoreFields.includes(key) && typeof fixedObj[key] === "number") {
+          fixedTotal += fixedObj[key];
+        }
+      }
+    }
+
+    const mealExpense = recentExpenses[0]?.total || 0;
+    const mealRate = totalMeals > 0 ? (mealExpense / totalMeals).toFixed(2) : 0;
+
+    const members = [...memberMap].map(([userId, data]) => ({
+      userId,
+      name: data.name,
+      totalMeals: data.totalMeals,
+      mealCost: (data.totalMeals * mealRate).toFixed(2),
+    }));
+
+    console.log("Total meals:", totalMeals);
+    console.log("Meal rate:", mealRate);
+    console.log("Members summary:", members);
+
+    res.json({
+      totalMeals,
+      totalMealExpense: mealExpense.toFixed(2),
+      fixedExpense: fixedTotal.toFixed(2),
+      mealRate,
+      members,
+    });
+  } catch (err) {
+    console.error("Error in meal summary route:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
 };

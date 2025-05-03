@@ -30,13 +30,14 @@ const Dashboard = () => {
         const headers = {
           Authorization: `Bearer ${token}`,
         };
-
+        
         const userRes = await api.get("/api/users/me", {
           headers,
         });
         setUser(userRes.data);
 
         const { messId, _id: userId } = userRes.data;
+        console.log(messId);
 
         const messRes = await api.get(`/api/mess/${messId}`, { headers });
         setMess(messRes.data);
