@@ -152,22 +152,27 @@ exports.getMealRate = async (req, res) => {
         },
         {
           $group: {
-            _id: null,
+            _id: "$payer",
             total: { $sum: "$amount" },
           },
         },
       ]),
     ]);
-
-    console.log("Fetched meals:", meals.length);
-    console.log("Sample meal data:", meals[0]);
-    console.log("Fetched users:", users.length);
-    console.log("Fetched fixed expenses:", fixed);
-    console.log("Recent expenses aggregation:", recentExpenses);
+    const userExpenseMap = new Map();
+    recentExpenses.forEach(({ _id, total }) => {
+      userExpenseMap.set(_id.toString(), total);
+    });
 
     const memberMap = new Map();
     users.forEach((user) => {
-      memberMap.set(user._id.toString(), { name: user.name, totalMeals: 0 });
+      const userId = user._id.toString();
+      const totalExpense = userExpenseMap.get(userId) || 0;
+
+      memberMap.set(userId, {
+        name: user.name,
+        totalMeals: 0,
+        expense: totalExpense,
+      });
     });
 
     let totalMeals = 0;
@@ -205,15 +210,32 @@ exports.getMealRate = async (req, res) => {
       }
     }
 
+    const utilityTotal = recentExpenses[1]?.total || 0;
+    const totalFixedAndUtility = fixedTotal + utilityTotal;
+    const fixedSharePerMember =
+      memberMap.size > 0
+        ? (totalFixedAndUtility / memberMap.size).toFixed(2)
+        : 0;
+
     const mealExpense = recentExpenses[0]?.total || 0;
     const mealRate = totalMeals > 0 ? (mealExpense / totalMeals).toFixed(2) : 0;
 
-    const members = [...memberMap].map(([userId, data]) => ({
-      userId,
-      name: data.name,
-      totalMeals: data.totalMeals,
-      mealCost: (data.totalMeals * mealRate).toFixed(2),
-    }));
+    const members = [...memberMap].map(([userId, data]) => {
+      console.log(data);
+      const mealCost = data.totalMeals * mealRate;
+      const totalDue =
+        parseFloat(fixedSharePerMember) + mealCost - data.expense;
+
+      return {
+        userId,
+        name: data.name,
+        totalMeals: data.totalMeals,
+        mealCost: mealCost.toFixed(2),
+        fixedShare: fixedSharePerMember,
+        userExpense: data.expense,
+        totalDue: totalDue.toFixed(2),
+      };
+    });
 
     console.log("Total meals:", totalMeals);
     console.log("Meal rate:", mealRate);
