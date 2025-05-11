@@ -2,7 +2,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "*" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -21,9 +21,17 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
 
     # Backend steps
+    - name: Cache backend dependencies
+      uses: actions/cache@v3
+      id: backend-cache
+      with:
+        path: SharedExpenseManager/backend/node_modules
+        key: ${{ runner.os }}-backend-${{ hashFiles('SharedExpenseManager/backend/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-backend-
+
     - name: Install backend dependencies
       working-directory: ./SharedExpenseManager/backend
       run: npm ci
@@ -35,6 +43,15 @@ jobs:
         NODE_ENV: production
 
     # Frontend steps
+    - name: Cache frontend dependencies
+      uses: actions/cache@v3
+      id: frontend-cache
+      with:
+        path: SharedExpenseManager/frontend/node_modules
+        key: ${{ runner.os }}-frontend-${{ hashFiles('SharedExpenseManager/frontend/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-frontend-
+
     - name: Install frontend dependencies
       working-directory: ./SharedExpenseManager/frontend
       run: npm ci
