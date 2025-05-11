@@ -11,6 +11,10 @@ const Dashboard = () => {
   const [mess, setMess] = useState(null);
   const [showMealForm, setShowMealForm] = useState(false);
   const [shouldReloadSummary, setShouldReloadSummary] = useState(false);
+  const currentMonth = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+  });
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -80,7 +84,7 @@ const Dashboard = () => {
 
         <h2 className="text-xl font-bold mb-2">{mess.name}</h2>
         <p className="text-gray-700">👥 Members: {mess.members?.length || 1}</p>
-        <p className="text-gray-700">📅 Period: April 2025</p>
+        <p className="text-gray-700">📅 Month: {currentMonth}</p>
         <p className="text-gray-700">
           👑 Admin: {user.isAdmin ? "You" : "N/A"}
         </p>
@@ -108,7 +112,7 @@ const Dashboard = () => {
       </div>
 
       {/* 💸 Expense Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-blue-100 p-4 rounded-xl text-center">
           <p className="text-sm text-gray-600">Total Expenses</p>
           <p className="text-lg font-bold">৳8,000</p>
@@ -125,7 +129,14 @@ const Dashboard = () => {
           <p className="text-sm text-gray-600">Balance</p>
           <p className="text-lg font-bold text-green-700">+৳500</p>
         </div>
-      </div>
+      </div> */}
+
+      {/* 🧮 Split Summary */}
+      <MessSummaryCard
+        messId={mess._id}
+        shouldReloadSummary={shouldReloadSummary}
+        setShouldReloadSummary={setShouldReloadSummary}
+      />
 
       {/* 📝 Recent Expenses */}
       <RecentExpensesCard
@@ -136,13 +147,6 @@ const Dashboard = () => {
       <FixedExpensesCard
         messId={mess._id}
         user={user}
-        setShouldReloadSummary={setShouldReloadSummary}
-      />
-
-      {/* 🧮 Split Summary */}
-      <MessSummaryCard
-        messId={mess._id}
-        shouldReloadSummary={shouldReloadSummary}
         setShouldReloadSummary={setShouldReloadSummary}
       />
     </div>

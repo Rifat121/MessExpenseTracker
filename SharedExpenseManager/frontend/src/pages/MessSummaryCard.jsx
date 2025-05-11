@@ -56,28 +56,32 @@ const MessSummaryCard = ({
   return (
     <div className="p-6 bg-gray-100">
       {/* Total Summary Card */}
-      <div className="mb-6 bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">
-          Mess Summary for {data.month}
+      <div className="mb-6 bg-white p-6 rounded-2xl shadow-sm border">
+        <h2 className="text-2xl font-semibold mb-5 text-black-700">
+          📋 Mess Summary (
+          {new Date(`${data.month}-01`).toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          })}
+          )
         </h2>
-        <p>
-          Total Meals: <span className="font-semibold">{data.totalMeals}</span>
-        </p>
-        <p>
-          Meal Rate: <span className="font-semibold">{data.mealRate}</span>
-        </p>
-        <p>
-          Meal Expense:{" "}
-          <span className="font-semibold">{data.mealExpense}</span>
-        </p>
-        <p>
-          Fixed Expense:{" "}
-          <span className="font-semibold">{data.fixedExpense}</span>
-        </p>
-        <p>
-          Utility Expense:{" "}
-          <span className="font-semibold">{data.utilityExpense}</span>
-        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+          {[
+            ["🍛 Total Meals", data.totalMeals],
+            ["💰 Meal Rate", `৳${data.mealRate}`],
+            ["📈 Meal Expense", `৳${data.mealExpense}`],
+            ["🏠 Fixed Expense", `৳${data.fixedExpense}`],
+            ["⚡ Utility Expense", `৳${data.utilityExpense}`],
+          ].map(([label, value], index) => (
+            <div
+              key={index}
+              className="bg-gray-50 p-4 rounded-lg flex justify-between items-center"
+            >
+              <span>{label}</span>
+              <span className="font-semibold">{value}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Members Breakdown Table */}
@@ -97,12 +101,14 @@ const MessSummaryCard = ({
           <tbody>
             {data.members.map((member, index) => (
               <tr key={index} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-2">{member.name}</td>
-                <td className="px-4 py-2">৳{member.totalMeals}</td>
-                <td className="px-4 py-2">৳{member.mealCost}</td>
-                <td className="px-4 py-2">৳{member.fixedShare}</td>
-                <td className="px-4 py-2">৳{member.userExpense}</td>
-                <td className="px-4 py-2">৳{member.totalDue}</td>
+                <td className="px-4 py-2  text-center">{member.name}</td>
+                <td className="px-4 py-2  text-center">{member.totalMeals}</td>
+                <td className="px-4 py-2  text-center">৳{member.mealCost}</td>
+                <td className="px-4 py-2  text-center">৳{member.fixedShare}</td>
+                <td className="px-4 py-2  text-center">
+                  ৳{member.userExpense}
+                </td>
+                <td className="px-4 py-2  text-center">৳{member.totalDue}</td>
               </tr>
             ))}
           </tbody>
