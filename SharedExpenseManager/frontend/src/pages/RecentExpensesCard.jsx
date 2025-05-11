@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 
-const RecentExpensesCard = ({ user }) => {
+const RecentExpensesCard = ({ user, setShouldReloadSummary }) => {
   const [expenses, setExpenses] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
@@ -23,6 +23,7 @@ const RecentExpensesCard = ({ user }) => {
       });
 
       setExpenses(res.data);
+      setShouldReloadSummary(true);
       setError(""); // Clear any previous errors
     } catch (err) {
       console.error("Error fetching expenses:", err);

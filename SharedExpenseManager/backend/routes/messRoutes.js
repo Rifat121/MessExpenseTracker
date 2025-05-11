@@ -1,12 +1,18 @@
 const express = require("express");
 const router = express.Router();
-const { getMessMembers, swapAdmin } = require("../controllers/messController");
+const {
+  getMessMembers,
+  swapAdmin,
+  getMessSummary,
+} = require("../controllers/messController");
+
 const { protect, isAdmin } = require("../middleware/authMiddleware"); // your JWT middleware
 const User = require("../models/User");
 const Mess = require("../models/Mess");
 
 router.get("/:id/members", protect, isAdmin, getMessMembers);
 router.patch("/:id/swap-admin", protect, isAdmin, swapAdmin);
+router.get("/summary/:messId", protect, getMessSummary);
 
 router.post("/create", protect, async (req, res) => {
   const { messname } = req.body;

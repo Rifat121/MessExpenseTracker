@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import api from "../api/api";
 
-const MealFormCard = ({ token, setShowMealForm }) => {
+const MealFormCard = ({ token, setShowMealForm, setShouldReloadSummary }) => {
   const [mealCount, setMealCount] = useState("");
   const [date, setDate] = useState(
     () => new Date().toISOString().split("T")[0]
@@ -31,6 +31,7 @@ const MealFormCard = ({ token, setShowMealForm }) => {
 
       setMessage("✅ Meal entry submitted successfully!");
       setMessageType("success");
+      setShouldReloadSummary(true);
 
       setMealCount("");
       setDate(new Date().toISOString().split("T")[0]);
