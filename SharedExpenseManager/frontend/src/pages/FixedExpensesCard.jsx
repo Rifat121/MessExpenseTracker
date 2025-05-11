@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 
-const FixedExpensesCard = ({ messId, user }) => {
+const FixedExpensesCard = ({ messId, user, setShouldReloadSummary }) => {
   const [expenses, setExpenses] = useState({
     electricity_bill: "",
     gas_bill: "",
@@ -57,6 +57,7 @@ const FixedExpensesCard = ({ messId, user }) => {
 
   const handleSave = async () => {
     setUpdateExpense("");
+    setShouldReloadSummary(true);
     try {
       const res = await api.put(
         `/api/fixed-expenses/${messId}`,

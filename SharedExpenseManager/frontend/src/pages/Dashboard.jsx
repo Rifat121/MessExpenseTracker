@@ -4,18 +4,19 @@ import api from "../api/api";
 import FixedExpensesCard from "./FixedExpensesCard";
 import RecentExpensesCard from "./RecentExpensesCard";
 import MealFormCard from "./MealFormCard";
+import MessSummaryCard from "./MessSummaryCard";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [mess, setMess] = useState(null);
   const [showMealForm, setShowMealForm] = useState(false);
-  // const [splitSummary, setSplitSummary] = useState([]);
+  const [shouldReloadSummary, setShouldReloadSummary] = useState(false);
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/"); // or whatever your login route is
+    navigate("/");
   };
   const handleNavigateToAdminDashboard = () => {
     if (user.isAdmin) {
@@ -30,23 +31,16 @@ const Dashboard = () => {
         const headers = {
           Authorization: `Bearer ${token}`,
         };
-        
+
         const userRes = await api.get("/api/users/me", {
           headers,
         });
         setUser(userRes.data);
 
         const { messId, _id: userId } = userRes.data;
-        console.log(messId);
 
         const messRes = await api.get(`/api/mess/${messId}`, { headers });
         setMess(messRes.data);
-
-        // const splitRes = await api.get(
-        //   `/api/expenses/split-summary/${messId}/${userId}`,
-        //   { headers }
-        // );
-        // setSplitSummary(splitRes.data);
       } catch (err) {
         console.error(
           "Error loading dashboard data:",
@@ -104,7 +98,11 @@ const Dashboard = () => {
         {/* Conditionally render the form */}
         {showMealForm && (
           <div className="w-full max-w-md mx-auto">
-            <MealFormCard token={token} setShowMealForm={setShowMealForm} />
+            <MealFormCard
+              token={token}
+              setShowMealForm={setShowMealForm}
+              setShouldReloadSummary={setShouldReloadSummary}
+            />
           </div>
         )}
       </div>
@@ -130,25 +128,23 @@ const Dashboard = () => {
       </div>
 
       {/* 📝 Recent Expenses */}
-      <RecentExpensesCard messId={mess._id} user={user} />
+      <RecentExpensesCard
+        user={user}
+        setShouldReloadSummary={setShouldReloadSummary}
+      />
 
-      <FixedExpensesCard messId={mess._id} user={user} />
+      <FixedExpensesCard
+        messId={mess._id}
+        user={user}
+        setShouldReloadSummary={setShouldReloadSummary}
+      />
 
       {/* 🧮 Split Summary */}
-      {/* <div className="bg-white p-6 rounded-2xl shadow-md">
-        <h3 className="text-lg font-semibold mb-4">You Owe / Receive</h3>
-        <ul className="text-sm space-y-2">
-          {splitSummary.map((item, idx) => (
-            <li key={idx} className="flex justify-between">
-              <span>
-                {item.type === "receive"
-                  ? `You will receive ৳${item.amount} from ${item.from}`
-                  : `You owe ৳${item.amount} to ${item.to}`}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div> */}
+      <MessSummaryCard
+        messId={mess._id}
+        shouldReloadSummary={shouldReloadSummary}
+        setShouldReloadSummary={setShouldReloadSummary}
+      />
     </div>
   );
 };
