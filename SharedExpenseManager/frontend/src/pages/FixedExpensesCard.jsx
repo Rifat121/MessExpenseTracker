@@ -57,7 +57,7 @@ const FixedExpensesCard = ({ messId, user, onUpdate }) => {
 
   const handleSave = async () => {
     setUpdateExpense("");
-    setShouldReloadSummary(true);
+    if (onUpdate) onUpdate();
     try {
       const res = await api.put(
         `/api/fixed-expenses/${messId}`,

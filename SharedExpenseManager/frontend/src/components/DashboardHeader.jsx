@@ -1,7 +1,7 @@
 import React from 'react';
 import MealFormCard from "../pages/MealFormCard";
 
-const DashboardHeader = ({ mess, user, handleLogout, handleNavigateToAdminDashboard, setShowMealForm, showMealForm, token }) => {
+const DashboardHeader = ({ mess, user, handleLogout, handleNavigateToAdminDashboard, setShowMealForm, showMealForm, onUpdate }) => {
   return (
     <div className="bg-white rounded-2xl shadow-md p-6 relative">
       <div className="absolute top-4 right-4">
