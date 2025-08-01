@@ -10,7 +10,7 @@ const CreateOrJoinMess = () => {
 
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token"); // Assuming you store JWT like this
+  
 
   const handleCreate = async (e) => {
     setError("");
@@ -18,12 +18,7 @@ const CreateOrJoinMess = () => {
     try {
       const res = await api.post(
         "/api/mess/create",
-        { messname: createMessName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { messname: createMessName }
       );
       if (res.status === 201) {
         navigate("/dashboard");
@@ -44,14 +39,10 @@ const CreateOrJoinMess = () => {
     try {
       const res = await api.post(
         "/api/mess/join",
-        { messname: messName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { messname: messName }
       );
       if (res.status === 200) {
+        login(res.data.token); // Update AuthContext with new token
         navigate("/dashboard");
       }
     } catch (err) {
@@ -69,10 +60,11 @@ const CreateOrJoinMess = () => {
       <h2 className="text-2xl font-bold text-center">Join or Create a Mess</h2>
 
       <div className="flex justify-center space-x-4">
-        {error && <div className="text-red-500">{error}</div>}
-
         <button
-          onClick={() => setActiveTab("create")}
+          onClick={() => {
+            setError("");
+            setActiveTab("create");
+          }}
           className={`px-4 py-2 rounded-full ${
             activeTab === "create"
               ? "bg-blue-600 text-white"
@@ -82,7 +74,10 @@ const CreateOrJoinMess = () => {
           Create
         </button>
         <button
-          onClick={() => setActiveTab("join")}
+          onClick={() => {
+            setError("");
+            setActiveTab("join");
+          }}
           className={`px-4 py-2 rounded-full ${
             activeTab === "join"
               ? "bg-blue-600 text-white"
@@ -105,6 +100,7 @@ const CreateOrJoinMess = () => {
               required
             />
           </label>
+          {error && <div className="text-red-500">{error}</div>}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
@@ -126,6 +122,7 @@ const CreateOrJoinMess = () => {
               required
             />
           </label>
+          {error && <div className="text-red-500">{error}</div>}
           <button
             type="submit"
             className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition"

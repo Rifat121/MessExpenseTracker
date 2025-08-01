@@ -27,7 +27,7 @@ const MealFormCard = ({ token, setShowMealForm, setShouldReloadSummary }) => {
         Authorization: `Bearer ${token}`,
       };
 
-      const res = await api.post("/api/meals/addMeal", payload, { headers });
+      const res = await api.post("/api/meals/addMeal", payload);
 
       setMessage("✅ Meal entry submitted successfully!");
       setMessageType("success");
@@ -35,7 +35,10 @@ const MealFormCard = ({ token, setShowMealForm, setShouldReloadSummary }) => {
 
       setMealCount("");
       setDate(new Date().toISOString().split("T")[0]);
-      setTimeout(() => setShowMealForm(false), 2000);
+      setTimeout(() => {
+        setShowMealForm(false);
+        if (onUpdate) onUpdate();
+      }, 2000);
     } catch (err) {
       const errorMsg =
         err.response?.data?.message || "❌ Failed to submit meal entry.";

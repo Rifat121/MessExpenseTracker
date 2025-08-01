@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 
-const FixedExpensesCard = ({ messId, user, setShouldReloadSummary }) => {
+const FixedExpensesCard = ({ messId, user, onUpdate }) => {
   const [expenses, setExpenses] = useState({
     electricity_bill: "",
     gas_bill: "",
@@ -57,21 +57,16 @@ const FixedExpensesCard = ({ messId, user, setShouldReloadSummary }) => {
 
   const handleSave = async () => {
     setUpdateExpense("");
-    setShouldReloadSummary(true);
+    if (onUpdate) onUpdate();
     try {
       const res = await api.put(
         `/api/fixed-expenses/${messId}`,
-        editedExpenses, // body
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+        editedExpenses
       );
 
       setIsEditing(false);
       setExpenses(editedExpenses);
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error("Error updating expenses:", err);
       const errorMessage = !err.response
