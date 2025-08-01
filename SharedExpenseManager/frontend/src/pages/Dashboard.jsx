@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [mess, setMess] = useState(null);
   const [showMealForm, setShowMealForm] = useState(false);
 
-  const token = localStorage.getItem("token");
+  
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -41,7 +41,7 @@ const Dashboard = () => {
 
         const { messId } = userRes.data;
 
-        const messRes = await api.get(`/api/mess/${messId}`, { headers });
+        const messRes = await api.get(`/api/mess/${messId}`);
         setMess(messRes.data);
       } catch (err) {
         console.error(
@@ -67,7 +67,6 @@ const Dashboard = () => {
         handleNavigateToAdminDashboard={handleNavigateToAdminDashboard}
         setShowMealForm={setShowMealForm}
         showMealForm={showMealForm}
-        token={token}
       />
 
       <ExpenseSummary messId={mess._id} userId={user._id} />

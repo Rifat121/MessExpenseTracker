@@ -10,7 +10,7 @@ const CreateOrJoinMess = () => {
 
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token"); // Assuming you store JWT like this
+  
 
   const handleCreate = async (e) => {
     setError("");
@@ -18,12 +18,7 @@ const CreateOrJoinMess = () => {
     try {
       const res = await api.post(
         "/api/mess/create",
-        { messname: createMessName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { messname: createMessName }
       );
       if (res.status === 201) {
         navigate("/dashboard");
@@ -44,12 +39,7 @@ const CreateOrJoinMess = () => {
     try {
       const res = await api.post(
         "/api/mess/join",
-        { messname: messName },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { messname: messName }
       );
       if (res.status === 200) {
         navigate("/dashboard");
