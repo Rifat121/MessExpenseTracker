@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 
-const RecentExpensesCard = ({ user }) => {
+const RecentExpensesCard = ({ user, onUpdate }) => {
   const [expenses, setExpenses] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
@@ -59,12 +59,7 @@ const RecentExpensesCard = ({ user }) => {
       return;
     }
     try {
-      const res = await api.post("/api/expenses/add", newExpense, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const res = await api.post("/api/expenses/add", newExpense);
 
       // Success case
       setNewExpense({
@@ -74,6 +69,7 @@ const RecentExpensesCard = ({ user }) => {
       });
       setShowForm(false);
       fetchExpenses();
+      if (onUpdate) onUpdate();
     } catch (err) {
       console.error("Error adding expense:", err);
 
