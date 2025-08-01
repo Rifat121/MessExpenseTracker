@@ -29,6 +29,8 @@ app.use("/api/mess", messRoutes);
 app.use("/api/fixed-expenses", fixedExpensesRoutes);
 app.use("/api/meals", mealRoutes);
 
+app.use(errorHandler);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

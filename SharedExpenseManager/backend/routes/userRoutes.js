@@ -2,6 +2,7 @@ const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { protect } = require("../middleware/authMiddleware");
+const asyncHandler = require("express-async-handler");
 
 const router = express.Router();
 
@@ -20,71 +21,57 @@ const generateToken = (user) => {
 };
 
 // 🟢 Register a New User
-router.post("/register", async (req, res) => {
-  try {
-    const { name, email, password, mobile } = req.body;
-    const userExists = await User.findOne({ email });
+router.post("/register", asyncHandler(async (req, res) => {
+  const { name, email, password, mobile } = req.body;
+  const userExists = await User.findOne({ email });
 
-    if (userExists)
-      return res.status(400).json({ message: "User already exists" });
-
-    const newUser = new User({ name, email, password, mobile });
-    await newUser.save();
-
-    res.status(201).json({ message: "User registered successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
+  if (userExists) {
+    res.status(400);
+    throw new Error("User already exists");
   }
-});
+
+  const newUser = new User({ name, email, password, mobile });
+  await newUser.save();
+
+  res.status(201).json({ message: "User registered successfully" });
+}));
 
 // 🟢 User Login
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
+router.post("/login", asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
 
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user),
-        messId: user.messId,
-        isAdmin: user.isAdmin,
-        isApproved: user.isApproved,
-      });
-    } else {
-      res.status(401).json({ message: "Invalid email or password" });
-    }
-  } catch (error) {
-    console.error("Login Error:", error); // 🔴 Log the error
-    res.status(500).json({ message: "Server Error", error });
+  if (user && (await user.matchPassword(password))) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user),
+      messId: user.messId,
+      isAdmin: user.isAdmin,
+      isApproved: user.isApproved,
+    });
+  } else {
+    res.status(401);
+    throw new Error("Invalid email or password");
   }
-});
+}));
 
-router.get("/me", protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("-password");
+router.get("/me", protect, asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id).select("-password");
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.json(user);
-  } catch (err) {
-    console.error("Error in /api/user/me:", err);
-    res.status(500).json({ message: "Server error" });
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
   }
-});
+
+  res.json(user);
+}));
 
 // 🟢 Get All Users
-router.get('/', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({message: 'Server Error', error});
-  }
-});
+router.get('/', asyncHandler(async (req, res) => {
+  const users = await User.find();
+  res.json(users);
+}));
 
 module.exports = router;
