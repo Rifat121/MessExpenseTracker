@@ -79,3 +79,5 @@ const { getExpenseSummary } = require("../controllers/expenseController");
 
 // 🟢 Get Expense Summary for a specific mess and user
 router.get("/summary/:messId/:userId", protect, getExpenseSummary);
+
+module.exports = router;
