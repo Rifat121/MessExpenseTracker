@@ -23,6 +23,7 @@ const RecentExpensesCard = ({ user, onUpdate }) => {
       });
 
       setExpenses(res.data);
+      setShouldReloadSummary(true);
       setError(""); // Clear any previous errors
     } catch (err) {
       console.error("Error fetching expenses:", err);
