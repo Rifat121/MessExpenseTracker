@@ -16,32 +16,15 @@ exports.getMessMembers = asyncHandler(async (req, res) => {
   res.json(mess.members);
 });
 
+const { validateAdminSwap } = require("../services/messService");
+
 // PATCH /mess/:id/swap-admin
 exports.swapAdmin = asyncHandler(async (req, res) => {
   const { newAdminId } = req.body;
   const messId = req.params.id;
+  const currentAdminId = req.user._id;
 
-  const mess = await Mess.findById(messId);
-  if (!mess) {
-    res.status(404);
-    throw new Error("Mess not found");
-  }
-
-  if (!mess.members.includes(newAdminId)) {
-    res.status(400);
-    throw new Error("User is not a member of this mess.");
-  }
-
-  const currentAdmin = await User.findById(mess.admin);
-  if (!currentAdmin) {
-    res.status(404);
-    throw new Error("Current admin not found.");
-  }
-
-  if (!currentAdmin.isAdmin) {
-    res.status(403);
-    throw new Error("Only the current admin can swap admin.");
-  }
+  const mess = await validateAdminSwap(messId, newAdminId, currentAdminId);
 
   mess.admin = newAdminId;
   await mess.save();
