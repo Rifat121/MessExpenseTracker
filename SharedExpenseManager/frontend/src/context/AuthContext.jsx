@@ -1,19 +1,20 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import AuthService from "../services/AuthService";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // default true
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = AuthService.getCurrentUser();
     if (token) {
       try {
         const decoded = jwtDecode(token);
         console.log("Decoded token:", decoded);
-        setUser(decoded); // assumes decoded has isApproved, etc.
+        setUser(decoded);
       } catch (error) {
         console.error("Failed to decode token", error);
         setUser(null);
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       setUser(null);
     }
-    setLoading(false); // must be called regardless
+    setLoading(false);
   }, []);
 
   return (

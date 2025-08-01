@@ -34,15 +34,9 @@ const Login = () => {
       return;
     }
     try {
-      const res = await api.post("/api/users/login", { email, password });
+      const res = await AuthService.login(email, password);
 
-      if (!res.data.token) {
-        setError("Invalid email or password. Please try again.");
-        return;
-      }
-      localStorage.setItem("token", res.data.token);
-
-      navigateToDashboard(res.data.isApproved);
+      navigateToDashboard(res.isApproved);
     } catch (error) {
       console.error("Login failed", error);
       setError(

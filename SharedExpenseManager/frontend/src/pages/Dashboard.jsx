@@ -16,7 +16,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    AuthService.logout();
     navigate("/");
   };
 
