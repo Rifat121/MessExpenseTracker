@@ -6,7 +6,7 @@ exports.protect = async (req, res, next) => {
 
   if (token && token.startsWith("Bearer")) {
     try {
-      const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET);
+      const decoded = jwt.verify(token.split(" ")[1], config.jwtSecret);
       req.user = await User.findById(decoded.userId).select("-password");
       next();
     } catch (error) {

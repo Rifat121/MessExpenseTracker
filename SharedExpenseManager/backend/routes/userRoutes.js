@@ -15,7 +15,7 @@ const generateToken = (user) => {
 
   return jwt.sign(
     { userId, isApproved, isAdmin, messId },
-    process.env.JWT_SECRET,
+    config.jwtSecret,
     { expiresIn: "1d" }
   );
 };
