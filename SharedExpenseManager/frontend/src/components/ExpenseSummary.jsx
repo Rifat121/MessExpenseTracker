@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api/api';
 
-const ExpenseSummary = ({ messId, userId }) => {
+const ExpenseSummary = ({ messId, userId, summaryRefreshKey }) => {
   const [summary, setSummary] = useState(null);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ const ExpenseSummary = ({ messId, userId }) => {
     if (messId && userId) {
       fetchSummary();
     }
-  }, [messId, userId]);
+  }, [messId, userId, summaryRefreshKey]);
 
   if (!summary) {
     return <div className="text-center mt-10">Loading...</div>;

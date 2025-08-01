@@ -1,4 +1,5 @@
 import React from 'react';
+import MealFormCard from "../pages/MealFormCard";
 
 const DashboardHeader = ({ mess, user, handleLogout, handleNavigateToAdminDashboard, setShowMealForm, showMealForm, token }) => {
   return (
@@ -38,7 +39,7 @@ const DashboardHeader = ({ mess, user, handleLogout, handleNavigateToAdminDashbo
 
       {showMealForm && (
         <div className="w-full max-w-md mx-auto">
-          <MealFormCard token={token} setShowMealForm={setShowMealForm} />
+          <MealFormCard setShowMealForm={setShowMealForm} onUpdate={onUpdate} />
         </div>
       )}
     </div>

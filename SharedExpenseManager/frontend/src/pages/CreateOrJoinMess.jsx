@@ -42,6 +42,7 @@ const CreateOrJoinMess = () => {
         { messname: messName }
       );
       if (res.status === 200) {
+        login(res.data.token); // Update AuthContext with new token
         navigate("/dashboard");
       }
     } catch (err) {
