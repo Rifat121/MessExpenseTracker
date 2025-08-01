@@ -42,7 +42,7 @@ const Login = () => {
       }
       localStorage.setItem("token", res.data.token);
 
-      navigateToDashboard(res.data.messId);
+      navigateToDashboard(res.data.isApproved);
     } catch (error) {
       console.error("Login failed", error);
       setError(
@@ -52,8 +52,8 @@ const Login = () => {
     }
   };
 
-  const navigateToDashboard = (messId) => {
-    if (messId) {
+  const navigateToDashboard = (isApproved) => {
+    if (isApproved) {
       navigate("/dashboard");
     } else {
       navigate("/create-or-join");

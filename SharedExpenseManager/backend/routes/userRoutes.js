@@ -6,8 +6,17 @@ const { protect } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Generate JWT Token
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+const generateToken = (user) => {
+  const userId = user._id;
+  const isApproved = user.isApproved;
+  const isAdmin = user.isAdmin;
+  const messId = user.messId;
+
+  return jwt.sign(
+    { userId, isApproved, isAdmin, messId },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
 };
 
 // 🟢 Register a New User
@@ -39,9 +48,10 @@ router.post("/login", async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
+        token: generateToken(user),
         messId: user.messId,
         isAdmin: user.isAdmin,
+        isApproved: user.isApproved,
       });
     } else {
       res.status(401).json({ message: "Invalid email or password" });

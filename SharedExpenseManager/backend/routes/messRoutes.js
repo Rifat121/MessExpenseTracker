@@ -56,9 +56,15 @@ router.post("/join", protect, async (req, res) => {
     const user = await User.findById(req.user._id);
 
     if (user.messId) {
-      return res
-        .status(400)
-        .json({ message: "User is already part of a mess." });
+      if (!user.isApproved) {
+        return res
+          .status(400)
+          .json({ message: "You have already requested to join a mess." });
+      } else {
+        return res
+          .status(400)
+          .json({ message: "You are already part of a mess." });
+      }
     }
 
     const mess = await Mess.findOne({ name: messname.toLowerCase() });
