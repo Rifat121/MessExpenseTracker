@@ -75,4 +75,7 @@ router.get("/recent/:messId", protect, asyncHandler(async (req, res) => {
   res.json(expenses);
 }));
 
-module.exports = router;
+const { getExpenseSummary } = require("../controllers/expenseController");
+
+// 🟢 Get Expense Summary for a specific mess and user
+router.get("/summary/:messId/:userId", protect, getExpenseSummary);

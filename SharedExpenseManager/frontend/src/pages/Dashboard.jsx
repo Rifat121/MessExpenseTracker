@@ -70,7 +70,7 @@ const Dashboard = () => {
         token={token}
       />
 
-      <ExpenseSummary />
+      <ExpenseSummary messId={mess._id} userId={user._id} />
 
       <RecentExpensesCard messId={mess._id} user={user} />
 
